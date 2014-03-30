@@ -16,10 +16,10 @@ function Initialize( Plugin )
 	Plugin:SetName( "CombatLog" )
 	Plugin:SetVersion( 1 )
 
-    cPluginManager:AddHook(cPluginManager.HOOK_TAKE_DAMAGE, OnTakeDamage);
-    cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed);
-    cPluginManager:AddHook(cPluginManager.HOOK_TICK, OnTick);
-    cPluginManager:AddHook(cPluginManager.HOOK_KILLING, OnKilling);
+	cPluginManager:AddHook(cPluginManager.HOOK_TAKE_DAMAGE, OnTakeDamage);
+	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed);
+	cPluginManager:AddHook(cPluginManager.HOOK_TICK, OnTick);
+	cPluginManager:AddHook(cPluginManager.HOOK_KILLING, OnKilling);
 
 	LOG( "Initialized " .. Plugin:GetName() .. " v." .. Plugin:GetVersion() )
 
@@ -35,13 +35,13 @@ function OnTakeDamage(Receiver, TDI)
             Player = tolua.cast(Receiver,"cPlayer")
             IsOnCombat[Player:GetName()] = true
             seconds[Player:GetName()] = 0
-            Player:SendMessageWarning("You're on a combat, don't disconnect")
+            Player:SendMessageWarning("You're in combat, don't disconnect")
         end
     elseif Receiver:IsPlayer() and TDI.Attacker:IsPlayer() then
         Player = tolua.cast(Receiver,"cPlayer")
         IsOnCombat[Player:GetName()] = true
         seconds[Player:GetName()] = 0
-        Player:SendMessageWarning("You're on a combat, don't disconnect")
+        Player:SendMessageWarning("You're in combat, don't disconnect")
     end
 end
 
@@ -50,7 +50,7 @@ function OnPlayerDestroyed(Player)
         IsOnCombat[Player:GetName()] = false
         seconds[Player:GetName()] = 0
         if BroadcastMessageOnCombatLog == true then
-            cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being on a combat! buuuhhh, you suck!")
+            cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being on a combat! booooo, you suck!")
         end
         if DropItemsOnCombatLog == true then
             local Items = cItems()
@@ -69,7 +69,7 @@ function OnTick(TimeDelta)
         local EachPlayer = function(Player)
             if IsOnCombat[Player:GetName()] == true then
                 if seconds[Player:GetName()] == CombatTime then
-                    Player:SendMessage("You are no longer in combat")
+                    Player:SendMessageInfo("You are no longer in combat")
                     IsOnCombat[Player:GetName()] = false
                 else
                     seconds[Player:GetName()] = seconds[Player:GetName()] + 1
