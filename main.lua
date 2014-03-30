@@ -1,5 +1,6 @@
 -- Configuration --
 CombatTime = 10
+AllowMobCombat = true
 
 
 Time = 0
@@ -23,7 +24,16 @@ function Initialize( Plugin )
 end
 
 function OnTakeDamage(Receiver, TDI)
-    if Receiver:IsPlayer() and TDI.Attacker:IsPlayer() then
+    if TDI.Attacker == nil then
+        return false    
+    elseif Receiver:IsPlayer() and TDI.Attacker:IsMob() then
+        if AllowMobCombat == true then
+            Player = tolua.cast(Receiver,"cPlayer")
+            IsOnCombat[Player:GetName()] = true
+            seconds[Player:GetName()] = 0
+            Player:SendMessageWarning("You're on a combat, don't disconnect")
+        end
+    elseif Receiver:IsPlayer() and TDI.Attacker:IsPlayer() then
         Player = tolua.cast(Receiver,"cPlayer")
         IsOnCombat[Player:GetName()] = true
         seconds[Player:GetName()] = 0
