@@ -1,6 +1,10 @@
 -- Configuration --
 CombatTime = 10
-AllowMobCombat = true
+AllowMobCombat = false
+RemoveXPonCombatLog = false
+DropItemsOnCombatLog = true
+BroadcastMessageOnCombatLog = true
+
 
 
 Time = 0
@@ -10,7 +14,7 @@ local IsOnCombat = {}
 function Initialize( Plugin )
 
 	Plugin:SetName( "CombatLog" )
-	Plugin:SetVersion( 0 )
+	Plugin:SetVersion( 1 )
 
     cPluginManager:AddHook(cPluginManager.HOOK_TAKE_DAMAGE, OnTakeDamage);
     cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed);
@@ -45,12 +49,18 @@ function OnPlayerDestroyed(Player)
     if IsOnCombat[Player:GetName()] == true then
         IsOnCombat[Player:GetName()] = false
         seconds[Player:GetName()] = 0
-        cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being on a combat, buuuhhh, you suck")
-        local Items = cItems()
-        Player:GetInventory():CopyToItems(Items)
-        Player:GetWorld():SpawnItemPickups( Items, Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 0, 0, 0 )
-        Player:GetInventory():Clear()
-        Player:SetCurrentExperience(0)
+        if BroadcastMessageOnCombatLog == true then
+            cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being on a combat! buuuhhh, you suck!")
+        end
+        if DropItemsOnCombatLog == true then
+            local Items = cItems()
+            Player:GetInventory():CopyToItems(Items)
+            Player:GetWorld():SpawnItemPickups( Items, Player:GetPosX(), Player:GetPosY(), Player:GetPosZ(), 0, 0, 0 )
+            Player:GetInventory():Clear()
+        end
+        if RemoveXPonCombatLog == true then
+            Player:SetCurrentExperience(0)
+        end
     end
 end
 
