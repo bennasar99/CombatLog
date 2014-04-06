@@ -1,9 +1,10 @@
 -- Configuration --
 CombatTime = 10
-AllowMobCombat = false
+AllowMobCombat = true
 RemoveXPonCombatLog = false
 DropItemsOnCombatLog = true
 BroadcastMessageOnCombatLog = true
+BlockCommandsOnCombat = true
 
 
 
@@ -20,6 +21,7 @@ function Initialize( Plugin )
 	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed);
 	cPluginManager:AddHook(cPluginManager.HOOK_TICK, OnTick);
 	cPluginManager:AddHook(cPluginManager.HOOK_KILLING, OnKilling);
+    cPluginManager:AddHook(cPluginManager.HOOK_EXECUTE_COMMAND, OnExecuteCommand);
 
 	LOG( "Initialized " .. Plugin:GetName() .. " v." .. Plugin:GetVersion() )
 
@@ -33,15 +35,19 @@ function OnTakeDamage(Receiver, TDI)
     elseif Receiver:IsPlayer() and TDI.Attacker:IsMob() then
         if AllowMobCombat == true then
             Player = tolua.cast(Receiver,"cPlayer")
-            IsOnCombat[Player:GetName()] = true
-            seconds[Player:GetName()] = 0
-            Player:SendMessageWarning("You're in combat, don't disconnect")
+            if (not(Player:HasPermission("combatlog.bypass"))) then
+                IsOnCombat[Player:GetName()] = true
+                seconds[Player:GetName()] = 0
+                Player:SendMessageWarning("You're in combat, don't disconnect")
+            end
         end
     elseif Receiver:IsPlayer() and TDI.Attacker:IsPlayer() then
-        Player = tolua.cast(Receiver,"cPlayer")
-        IsOnCombat[Player:GetName()] = true
-        seconds[Player:GetName()] = 0
-        Player:SendMessageWarning("You're in combat, don't disconnect")
+            Player = tolua.cast(Receiver,"cPlayer")
+            if (not(Player:HasPermission("combatlog.bypass"))) then
+                IsOnCombat[Player:GetName()] = true
+                seconds[Player:GetName()] = 0
+                Player:SendMessageWarning("You're in combat, don't disconnect")
+            end
     end
 end
 
@@ -91,5 +97,14 @@ function OnKilling(Victim, Killer)
         Player = tolua.cast(Victim,"cPlayer")
         IsOnCombat[Player:GetName()] = false
         seconds[Player:GetName()] = 0
+    end
+end
+
+function OnExecuteCommand(Player, Command)
+    if BlockCommandsOnCombat == true then
+        if IsOnCombat[Player:GetName()] == true then
+            Player:SendMessageFailure("You're on a combat")
+            return true
+        end
     end
 end
