@@ -56,7 +56,7 @@ function OnPlayerDestroyed(Player)
         IsOnCombat[Player:GetName()] = false
         seconds[Player:GetName()] = 0
         if BroadcastMessageOnCombatLog == true then
-            cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being on a combat! booooo, you suck!")
+            cRoot:Get():BroadcastChat(Player:GetName().." disconnected while being in combat! Booooo, you suck!")
         end
         if DropItemsOnCombatLog == true then
             local Items = cItems()
@@ -101,10 +101,12 @@ function OnKilling(Victim, Killer)
 end
 
 function OnExecuteCommand(Player, Command)
-    if BlockCommandsOnCombat == true then
-        if IsOnCombat[Player:GetName()] == true then
-            Player:SendMessageFailure("You're on a combat")
-            return true
-        end
-    end
+	if Player ~= nil then
+		if BlockCommandsOnCombat == true then
+		        if IsOnCombat[Player:GetName()] == true then
+		        	Player:SendMessageFailure("You're in combat!")
+		        	return true
+		        end
+		end
+	end
 end
